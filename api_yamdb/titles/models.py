@@ -3,11 +3,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 
+
 User = get_user_model()
-
-
-# class User(AbstractUser):
-#     pass
 
 
 class Category(models.Model):
@@ -27,17 +24,17 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256)
-    # year = models.IntegerField()
-    # genre = models.ManyToManyField(
-    #     Genre,
-    #     related_name="titles", blank=True, null=True
-    # )
-    # description = models.TextField(null=True)
-    # category = models.ForeignKey(
-    #     Category, on_delete=models.SET_NULL,
-    #     related_name="titles", blank=True, null=True
-    # )
+    name = models.TextField(max_length=256, db_index=True)
+    year = models.IntegerField()
+    genre = models.ManyToManyField(
+        Genre,
+        related_name="titles", blank=True, null=True
+    )
+    description = models.TextField()
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL,
+        related_name="titles", blank=True, null=True
+    )
 
     def __str__(self):
         return self.name
