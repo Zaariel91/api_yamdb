@@ -1,15 +1,15 @@
 from rest_framework import viewsets, filters
-
 from rest_framework.pagination import LimitOffsetPagination
-
-from titles.models import Category, Genre, Title
-from .serializers import (
-    CategorySerializer,
-    GenreSerializer,
-    TitleSerializer
-)
 from rest_framework.permissions import (
     IsAdminOrReadOnly,
+)
+from titles.models import Category, Comment, Genre, Review, Title
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer
+    GenreSerializer,
+    ReviewSerializer
+    TitleSerializer,
 )
 
 
@@ -22,7 +22,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'year', 'category__slug', 'genre__slug')
 
 
-
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -33,6 +32,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
