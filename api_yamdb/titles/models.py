@@ -5,10 +5,6 @@ from django.contrib.auth.models import AbstractUser
 User = get_user_model()
 
 
-class User(AbstractUser):
-    pass
-
-
 class Category(models.Model):
     name = models.CharField(max_length=256, db_index=True)
     slug = models.SlugField(unique=True)
