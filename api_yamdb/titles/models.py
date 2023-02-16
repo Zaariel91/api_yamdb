@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+
 
 User = get_user_model()
 
@@ -27,7 +27,7 @@ class Title(models.Model):
     name = models.TextField(max_length=256, db_index=True)
     year = models.IntegerField()
     genre = models.ManyToManyField(
-        Genre, on_delete=models.SET_NULL,
+        Genre,
         related_name="titles", blank=True, null=True
     )
     description = models.TextField()
