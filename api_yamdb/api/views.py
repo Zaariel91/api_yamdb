@@ -11,9 +11,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import viewsets, filters
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (
-    IsAdminOrReadOnly,
-)
+# from rest_framework.permissions import (
+#     IsAdminOrReadOnly,
+# )
 from titles.models import Category, Comment, Genre, Review, Title
 from .serializers import (
     CategorySerializer,
@@ -21,9 +21,10 @@ from .serializers import (
     CreateUserSerializer,
     GenreSerializer,
     GetTokenSerializer,
-    ReviewSerializer
+    ReviewSerializer,
     TitleSerializer,
 )
+from .permissions import isAuthor_Admin_Moderator_or_ReadOnly
 
 
 User = get_user_model()
@@ -93,7 +94,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'year', 'category__slug', 'genre__slug')
@@ -102,6 +103,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CommentViewset(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [isAuthor_Admin_Moderator_or_ReadOnly]
 
     def get_queryset(self):
         return super().get_queryset().filter(
@@ -117,7 +119,7 @@ class CommentViewset(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -129,7 +131,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -138,6 +140,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 class ReviewViewset(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [isAuthor_Admin_Moderator_or_ReadOnly]
 
     def get_queryset(self):
         return super().get_queryset().filter(
