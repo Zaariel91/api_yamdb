@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, ValidationError
 from django.contrib.auth import get_user_model
+from django.db import models
+from django.shortcuts import get_object_or_404
 from .validators import validate_username
 from titles.models import Category, Genre, Title, Comment, Review
 
@@ -71,6 +73,16 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
 
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+
     class Meta:
         model = Title
         fields = '__all__'
@@ -87,6 +99,10 @@ class CommentSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username', read_only=True)
     title = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         fields = '__all__'
         model = Review
+
+        
+        
