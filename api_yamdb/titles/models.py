@@ -55,8 +55,9 @@ class Review(models.Model):
 
     def __str__(self) -> str:
         return self.text
-        
-       
+
+    
+  
 class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
