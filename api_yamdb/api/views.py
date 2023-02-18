@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,9 +22,10 @@ from .serializers import (
     GenreSerializer,
     GetTokenSerializer,
     ReviewSerializer,
+    UserSerializer,
     TitleSerializer,
 )
-from .permissions import isAuthor_Admin_Moderator_or_ReadOnly, isAdminOrReadOnly
+from .permissions import isAuthor_Admin_Moderator_or_ReadOnly, isAdminOrReadOnly, IsAdmin
 
 
 User = get_user_model()
@@ -88,7 +89,30 @@ def send_confirmation_code(username, email):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+
+    @action(
+        detail=False,
+        methods=['GET', 'PATCH'],
+        permission_classes=(permissions.IsAuthenticated,),
+        url_name='me',
+        url_path='me'
+    )
+    def me(self, request):
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=user.role, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
