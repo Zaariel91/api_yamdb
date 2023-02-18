@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator, ValidationError
+from rest_framework.validators import UniqueValidator, ValidationError, UniqueTogetherValidator
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.shortcuts import get_object_or_404
 from .validators import validate_username
-from titles.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Genre, Title, Comment, Review
 
 User = get_user_model()
 
@@ -98,11 +98,23 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    title = serializers.PrimaryKeyRelatedField(read_only=True)
+    # title = serializers.PrimaryKeyRelatedField(read_only=True)
     
-    class Meta:
-        fields = '__all__'
-        model = Review
 
+    class Meta:
+        exclude = ('title',)
+        model = Review
+    
+    def create(self, validated_data):
+        if Review.objects.filter(
+            author=self.context['request'].user,
+            title=validated_data.get('title')
+        ).exists():
+            raise serializers.ValidationError(
+                'Нельзя оставить больше одного обзора.')
+
+        review = Review.objects.create(**validated_data,)
+
+        return review
         
         

@@ -56,8 +56,12 @@ class Review(models.Model):
     def __str__(self) -> str:
         return self.text
 
-    
-  
+    class Meta:
+        constraints = [
+                models.UniqueConstraint(fields=['title', 'author'], name='unique_review')
+        ]
+        
+       
 class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
