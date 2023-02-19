@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import AbstractUser
 
 
 User = get_user_model()
@@ -38,6 +37,19 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    """Вспомогательный класс, связывающий жанры и произведения."""
+
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+    )
 
 
 class Review(models.Model):
