@@ -5,6 +5,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
+from django.http import Http404
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
@@ -14,7 +15,7 @@ from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import TitleFilter
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import mixins
 # from rest_framework.permissions import (
 #     IsAdminOrReadOnly,
@@ -172,16 +173,39 @@ class CategoryViewSet(viewsets.GenericViewSet,
 
 
 class GenreViewSet(viewsets.GenericViewSet,
-                      mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin):
+                    mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [AdminOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    lookup_fields = 'slug'
+    lookup_field = 'slug'
+
+    # def perform_destroy(self, instance):
+    #     instance.delete()
+
+    # def destroy(self, request, *args, **kwargs):
+    #     try:
+    #         instance = self.get_object()
+    #         self.perform_destroy(instance)
+    #     except Http404:
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    
+
+    # def destroy(self, request, *args, **kwargs):
+    #     try:
+    #         instance = self.get_object()
+    #         self.perform_destroy(instance)
+    #     except Http404:
+    #         pass
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # def perform_destroy(self, instance):
+    #     return instance.delete()
 
 
 class ReviewViewset(viewsets.ModelViewSet):
