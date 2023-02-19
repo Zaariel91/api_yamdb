@@ -75,4 +75,3 @@ class IsAdmin(permissions.BasePermission):
 #             return True
 #         else:
 #             return request.user.is_admin
-

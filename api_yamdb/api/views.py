@@ -4,12 +4,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import TitleFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import mixins
@@ -26,8 +29,13 @@ from .serializers import (
     ReviewSerializer,
     UserSerializer,
     TitleSerializer,
+    TitleScoreSerializer,
 )
-from .permissions import isAuthor_Admin_Moderator_or_ReadOnly, IsAdmin, AdminOrReadOnly, AdminOnly
+from .permissions import (
+    isAuthor_Admin_Moderator_or_ReadOnly,
+    IsAdmin, AdminOrReadOnly,
+    AdminOnly,
+)
 
 
 User = get_user_model()
@@ -118,14 +126,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name', 'year', 'category__slug', 'genre__slug')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
-
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleScoreSerializer
+        return TitleSerializer
 
 class CommentViewset(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
@@ -160,7 +171,10 @@ class CategoryViewSet(viewsets.GenericViewSet,
     #     serializer.save(author=self.request.user)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(viewsets.GenericViewSet,
+                      mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [AdminOrReadOnly, IsAuthenticatedOrReadOnly]
