@@ -33,7 +33,7 @@ class Title(models.Model):
     description = models.TextField()
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
-        related_name="titles", blank=True, null=True
+        related_name="titles",blank=True, null=True
     )
 
     def __str__(self):
