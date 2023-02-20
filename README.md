@@ -36,6 +36,12 @@ pip install -r requirement.txt
 python manage.py migrate
 ```
 
+Импортировать базу-данных из csv-файла:
+
+```
+python manage.py runscript import_csv
+```
+
 Запустить проект:
 
 ```
