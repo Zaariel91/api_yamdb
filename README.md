@@ -39,7 +39,25 @@ python manage.py migrate
 python manage.py migrate --run-syncdb
 ```
 
-Импортировать базу-данных из csv-файла:
+Для импортирования базы-данных из csv-файла выполните следующие действия:
+
+Установите модуль django-extensions:
+
+```
+pip install django-extensions
+```
+
+Подключите модуль добавлением в INSTALLED_APPS вашего проекта в файл settings.py
+
+```
+INSTALLED_APPS = (
+    ...
+    'django_extensions',
+    ...
+)
+```
+
+Выполните импорт csv
 
 ```
 python manage.py runscript import_csv
