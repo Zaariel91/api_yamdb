@@ -32,7 +32,7 @@ class Title(models.Model):
     description = models.TextField()
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
-        related_name="titles",blank=True, null=True
+        related_name="titles", blank=True, null=True
     )
 
     def __str__(self):
@@ -70,10 +70,11 @@ class Review(models.Model):
 
     class Meta:
         constraints = [
-                models.UniqueConstraint(fields=['title', 'author'], name='unique_review')
+            models.UniqueConstraint(fields=['title', 'author'],
+                                    name='unique_review')
         ]
-        
-       
+
+
 class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey(

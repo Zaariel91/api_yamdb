@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator, ValidationError, UniqueTogetherValidator
+from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.shortcuts import get_object_or_404
 from .validators import validate_username
 from reviews.models import Category, Genre, Title, Comment, Review
+
 
 User = get_user_model()
 
@@ -55,14 +54,14 @@ class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
-        
+
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
         fields = ('name', 'slug')
-    
+
 
 class GenreSerializer(serializers.ModelSerializer):
 
@@ -100,22 +99,23 @@ class TitleScoreSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
     review = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         fields = '__all__'
         model = Comment
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    # title = serializers.PrimaryKeyRelatedField(read_only=True)
-    
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
 
     class Meta:
         exclude = ('title',)
         model = Review
-    
+
     def create(self, validated_data):
         if Review.objects.filter(
             author=self.context['request'].user,
@@ -125,7 +125,4 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Нельзя оставить больше одного обзора.')
 
         review = Review.objects.create(**validated_data,)
-
         return review
-        
-        
