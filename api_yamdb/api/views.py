@@ -1,12 +1,10 @@
 from http import HTTPStatus
-from django.core.mail import send_mail
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from rest_framework import status, viewsets, permissions
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -62,40 +60,18 @@ class APIGetToken(APIView):
         )
 
 
-@api_view(['POST'])
-def user_create_view(request):
-    email = request.data.get('email')
-    username = request.data.get('username')
-    if User.objects.filter(username=username, email=email).exists():
+class UserCreateView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        username = request.data.get('username')
+        if User.objects.filter(username=username, email=email).exists():
+            send_confirmation_code(username, email)
+            return Response(request.data, status=status.HTTP_200_OK)
+        serializer = CreateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         send_confirmation_code(username, email)
-        return Response(request.data, status=status.HTTP_200_OK)
-    serializer = CreateUserSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    send_confirmation_code(username, email)
-    return Response(serializer.data, status=HTTPStatus.OK)
-
-
-# class UserCreateViewSet(mixins.CreateModelMixin,
-#                         viewsets.GenericViewSet):
-#     """Вьюсет для создания обьектов класса User."""
-
-#     queryset = User.objects.all()
-#     serializer_class = UserCreateSerializer
-#     permission_classes = (permissions.AllowAny,)
-
-#     def create(self, request):
-#         """Создает объект класса User и
-#         отправляет на почту пользователя код подтверждения."""
-#         serializer = UserCreateSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user, _ = User.objects.get_or_create(**serializer.validated_data)
-#         confirmation_code = default_token_generator.make_token(user)
-#         send_confirmation_code(
-#             email=user.email,
-#             confirmation_code=confirmation_code
-#         )
-#         return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=HTTPStatus.OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
