@@ -4,11 +4,11 @@ from .views import (
     ReviewViewset,
     TitleViewSet,
     CommentViewset,
-    user_create_view,
     APIGetToken,
     GenreViewSet,
     CategoryViewSet,
-    UserViewSet
+    UserViewSet,
+    user_create_view,
 )
 
 router = routers.DefaultRouter()
@@ -25,6 +25,7 @@ router.register(
 
 urlpatterns = [
     path('v1/', include(router.urls)),
-    path('v1/auth/signup/', user_create_view),
-    path('v1/auth/token/', APIGetToken.as_view())
+    path('v1/auth/token/', APIGetToken.as_view()),
+    path('v1/auth/signup/',user_create_view)
+    # path('v1/auth/signup/',UserCreateView.as_view({'post':'create'}))
 ]

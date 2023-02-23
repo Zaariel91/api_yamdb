@@ -1,8 +1,8 @@
 from http import HTTPStatus
+from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from rest_framework import status, viewsets, permissions
@@ -17,6 +17,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import mixins
 from reviews.models import Category, Comment, Genre, Review, Title
+from .methods import send_confirmation_code
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -42,15 +43,13 @@ class APIGetToken(APIView):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        try:
-            user = User.objects.get(username=data['username'])
-            confirmation_code = data['confirmation_code']
-        except User.DoesNotExist:
+        user = User.objects.filter(username=data['username']).first()
+        confirmation_code = data['confirmation_code']
+        if not user:
             return Response(
                 {'username': 'Пользователя не существует'},
                 status=status.HTTP_404_NOT_FOUND
             )
-
         if default_token_generator.check_token(user, confirmation_code):
             token = RefreshToken.for_user(user).access_token
             return Response(
@@ -77,27 +76,32 @@ def user_create_view(request):
     return Response(serializer.data, status=HTTPStatus.OK)
 
 
-def send_confirmation_code(username, email):
-    user = get_object_or_404(User, email=email, username=username)
-    confirmation_code = default_token_generator.make_token(user)
-    user.confirmation_code = confirmation_code
-    MESSAGE = (
-        f'Здравствуйте, {username}!'
-        f'Ваш код подтверждения: {user.confirmation_code}'
-    )
-    send_mail(
-        message=MESSAGE,
-        subject='Confirmation code',
-        recipient_list=[user.email],
-        from_email=settings.DEFAULT_FROM_EMAIL,
-    )
-    user.save()
+# class UserCreateViewSet(mixins.CreateModelMixin,
+#                         viewsets.GenericViewSet):
+#     """Вьюсет для создания обьектов класса User."""
+
+#     queryset = User.objects.all()
+#     serializer_class = UserCreateSerializer
+#     permission_classes = (permissions.AllowAny,)
+
+#     def create(self, request):
+#         """Создает объект класса User и
+#         отправляет на почту пользователя код подтверждения."""
+#         serializer = UserCreateSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         user, _ = User.objects.get_or_create(**serializer.validated_data)
+#         confirmation_code = default_token_generator.make_token(user)
+#         send_confirmation_code(
+#             email=user.email,
+#             confirmation_code=confirmation_code
+#         )
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = [IsAdmin]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'

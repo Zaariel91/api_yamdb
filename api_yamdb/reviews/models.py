@@ -40,8 +40,6 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    """Вспомогательный класс, связывающий жанры и произведения."""
-
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
@@ -69,6 +67,8 @@ class Review(models.Model):
         return self.text
 
     class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Отзыв'
         constraints = [
             models.UniqueConstraint(fields=['title', 'author'],
                                     name='unique_review')

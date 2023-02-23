@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
-from .validators import validate_username
+from users.validators import validate_username
 from reviews.models import Category, Genre, Title, Comment, Review
 
 

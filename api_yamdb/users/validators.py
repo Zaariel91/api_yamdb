@@ -1,13 +1,12 @@
 import re
-
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+
+USERNAME = re.compile(r'^[\w.@+-]+')
 
 
-def validate_username(value):
-    if value.lower() == 'me':
-        raise ValidationError(
-            ('/Me/ служебное имя, введите другое имя!')
-        )
-    if not re.match(r'[\w.@+-]+\Z', value):
-        raise ValidationError(_(f'{value} содержит запрещенные символы!'))
+def validate_username(name):
+    if name == 'me':
+        raise ValidationError('Имя пользователя "me" уже существует, введите другое имя')
+    if not USERNAME.fullmatch(name):
+        raise ValidationError('В названии имени можно использовать только буквы, цифры')
+

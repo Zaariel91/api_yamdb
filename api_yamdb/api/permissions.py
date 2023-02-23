@@ -25,11 +25,6 @@ class AdminOrReadOnly(permissions.BasePermission):
         )
 
 
-class IsGuest(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_anonymous
-
-
 class IsAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
