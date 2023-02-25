@@ -28,7 +28,7 @@ from .serializers import (
     TitleScoreSerializer,
 )
 from .permissions import (
-    isAuthor_Admin_Moderator_or_ReadOnly,
+    isAuthorOrAdminOrModeratorOrReadOnly,
     IsAdmin, AdminOrReadOnly,
 )
 
@@ -118,7 +118,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CommentViewset(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [isAuthor_Admin_Moderator_or_ReadOnly]
+    permission_classes = [isAuthorOrAdminOrModeratorOrReadOnly]
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -161,7 +161,7 @@ class GenreViewSet(viewsets.GenericViewSet,
 class ReviewViewset(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [isAuthor_Admin_Moderator_or_ReadOnly]
+    permission_classes = [isAuthorOrAdminOrModeratorOrReadOnly]
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
