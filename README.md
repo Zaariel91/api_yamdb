@@ -24,7 +24,7 @@ source env/bin/activate
 python3 -m pip install --upgrade pip
 ```
 
-Установить зависимости из файла requirements.txt:
+Установить зависимости из файла requirements.txt::
 
 ```
 pip install -r requirement.txt
